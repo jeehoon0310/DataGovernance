@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디플래닉스 데이터 거버넌스 및 플랫폼팀 관리</title>
+    <style>
+        /* 디자인 시스템 - 컬러 팔레트 */
+        :root {
+            /* 교보그룹 브랜드 컬러 */
+            --primary-blue: #2563EB;
+            --primary-navy: #1E40AF;
+            --accent-cyan: #06B6D4;
+            --accent-emerald: #10B981;
+            
+            /* 디플래닉스 AI/데이터 컬러 */
+            --data-purple: #8B5CF6;
+            --data-pink: #EC4899;
+            --data-orange: #F97316;
+            
+            /* 배경 & 글래스 */
+            --background-dark: #0F172A;
+            --background-light: #1E293B;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(148, 163, 184, 0.2);
+            
+            /* 텍스트 팔레트 */
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            
+            /* 간격 시스템 */
+            --space-xs: 0.625rem;
+            --space-sm: 1.25rem;
+            --space-md: 2.5rem;
+            --space-lg: 5rem;
+            --space-xl: 7.5rem;
+        }
+        
+        /* 리셋 & 기본 스타일 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--background-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 슬라이드 컨테이너 */
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* 슬라이드 기본 스타일 */
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            padding: var(--space-lg);
+            position: relative;
+            overflow: hidden;
+            animation: slideEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+        
+        /* 애니메이션 */
+        @keyframes slideEnter {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes dataPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        @keyframes chartGrow {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        
+        /* 타이포그래피 */
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-blue) 50%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-sm);
+        }
+        
+        h2 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            margin-bottom: var(--space-sm);
+        }
+        
+        h3 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: var(--space-xs);
+        }
+        
+        p {
+            font-size: 1.125rem;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+        
+        /* 글래스 카드 */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: var(--space-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 12px 48px rgba(37, 99, 235, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 네비게이션 */
+        .navigation {
+            position: fixed;
+            bottom: var(--space-md);
+            right: var(--space-md);
+            display: flex;
+            gap: var(--space-sm);
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .nav-btn:hover {
+            background: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        /* 슬라이드 인디케이터 */
+        .slide-indicator {
+            position: fixed;
+            bottom: var(--space-md);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+        
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--glass-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .indicator-dot.active {
+            background: var(--accent-cyan);
+            transform: scale(1.5);
+        }
+        
+        /* 슬라이드별 커스텀 스타일 */
+        #slide1 {
+            background: radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.2) 0%, transparent 40%),
+                        var(--background-dark);
+        }
+        
+        #slide2 {
+            background: radial-gradient(ellipse at top right, var(--background-light) 0%, var(--background-dark) 70%);
+        }
+        
+        #slide5 {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                        var(--background-dark);
+        }
+        
+        /* 레이아웃 그리드 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+        }
+        
+        /* 차트 스타일 */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            margin-top: var(--space-sm);
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100%;
+            gap: 0.5rem;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--accent-cyan) 0%, var(--primary-blue) 100%);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transform-origin: bottom;
+            animation: chartGrow 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: calc(var(--index) * 0.1s);
+            opacity: 0;
+        }
+        
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .chart-label {
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        /* 네트워크 다이어그램 */
+        .network-diagram {
+            width: 100%;
+            height: 400px;
+            margin-top: var(--space-md);
+        }
+        
+        .network-node {
+            fill: var(--primary-blue);
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .network-node:hover {
+            fill: var(--accent-cyan);
+            transform: scale(1.1);
+        }
+        
+        .network-edge {
+            stroke: var(--glass-border);
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
+        }
+        
+        .node-label {
+            fill: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        /* KPI 카드 */
+        .kpi-card {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        
+        .kpi-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--accent-emerald) 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: dataPulse 2s ease-in-out infinite;
+        }
+        
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--accent-emerald);
+            font-weight: 600;
+        }
+        
+        /* 타임라인 */
+        .timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: var(--space-md);
+            position: relative;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--glass-border);
+            z-index: 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            z-index: 1;
+            background: var(--background-dark);
+            padding: 0 1rem;
+        }
+        
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            margin: 0 auto 0.5rem;
+            animation: dataPulse 2s ease-in-out infinite;
+            animation-delay: calc(var(--index) * 0.3s);
+        }
+        
+        .timeline-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        /* 히트맵 */
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: var(--space-md);
+        }
+        
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--background-dark);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        /* 체크리스트 */
+        .checklist {
+            margin-top: var(--space-md);
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .checklist-item:hover {
+            background: rgba(37, 99, 235, 0.2);
+            transform: translateX(10px);
+        }
+        
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item.checked .checklist-checkbox {
+            background: var(--accent-emerald);
+            border-color: var(--accent-emerald);
+        }
+        
+        .checklist-item.checked .checklist-checkbox::after {
+            content: '✓';
+            color: var(--background-dark);
+            font-weight: 900;
+        }
+        
+        /* 버블 차트 */
+        .bubble-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            margin-top: var(--space-md);
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--primary-blue));
+            color: var(--text-primary);
+            font-weight: 700;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        
+        .bubble:hover {
+            transform: scale(1.1);
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        /* 비전 선언문 */
+        .vision-statement {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-top: var(--space-lg);
+            padding: var(--space-md);
+            background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 24px;
+            border: 2px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vision-statement::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--data-purple), var(--data-pink));
+            border-radius: 24px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .vision-statement:hover::before {
+            opacity: 0.3;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2rem; }
+            h3 { font-size: 1.5rem; }
+            .slide { padding: var(--space-md); }
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- 슬라이드 1: 문제 정의/현황 분석 -->
+        <section id="slide1" class="slide active">
+            <div>
+                <h1>데이터 사일로가 만든 한계</h1>
+                <h3>교보그룹 데이터 통합의 시급성</h3>
+            </div>
+            
+            <div class="content-grid">
+                <div class="glass-card">
+                    <h3>5개 계열사 데이터 단절</h3>
+                    <svg class="network-diagram" viewBox="0 0 600 400">
+                        <!-- 중앙 노드 (디플래닉스) -->
+                        <circle cx="300" cy="200" r="40" class="network-node" id="center-node"/>
+                        <text x="300" y="205" class="node-label">디플래닉스</text>
+                        
+                        <!-- 계열사 노드들 -->
+                        <circle cx="150" cy="100" r="35" class="network-node" data-company="교보생명"/>
+                        <text x="150" y="105" class="node-label">교보생명</text>
+                        
+                        <circle cx="450" cy="100" r="35" class="network-node" data-company="교보문고"/>
+                        <text x="450" y="105" class="node-label">교보문고</text>
+                        
+                        <circle cx="100" cy="300" r="35" class="network-node" data-company="교보증권"/>
+                        <text x="100" y="305" class="node-label">교보증권</text>
+                        
+                        <circle cx="500" cy="300" r="35" class="network-node" data-company="e보험"/>
+                        <text x="500" y="305" class="node-label">e보험</text>
+                        
+                        <circle cx="300" cy="350" r="35" class="network-node" data-company="SBI"/>
+                        <text x="300" y="355" class="node-label">SBI</text>
+                        
+                        <!-- 연결선 (단절된 상태) -->
+                        <line x1="260" y1="200" x2="185" y2="125" class="network-edge"/>
+                        <line x1="340" y1="200" x2="415" y2="125" class="network-edge"/>
+                        <line x1="260" y1="230" x2="135" y2="275" class="network-edge"/>
+                        <line x1="340" y1="230" x2="465" y2="275" class="network-edge"/>
+                        <line x1="300" y1="240" x2="300" y2="315" class="network-edge"/>
+                    </svg>
+                </div>
+                
+                <div class="glass-card">
+                    <h3>데이터 활용도 격차</h3>
+                    <div class="heatmap">
+                        <div class="heatmap-cell" style="background: #10B981; --index: 0;">70%</div>
+                        <div class="heatmap-cell" style="background: #F59E0B; --index: 1;">45%</div>
+                        <div class="heatmap-cell" style="background: #EF4444; --index: 2;">30%</div>
+                        <div class="heatmap-cell" style="background: #EF4444; --index: 3;">25%</div>
+                        <div class="heatmap-cell" style="background: #F59E0B; --index: 4;">40%</div>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem;">계열사별 데이터 활용률</p>
+                </div>
+            </div>
+            
+            <div class="glass-card" style="margin-top: var(--space-md);">
+                <div class="content-grid">
+                    <div>
+                        <h3 style="color: var(--data-orange);">⚠️ 핵심 문제점</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.5rem;">📊 데이터 품질 편차: 40%</li>
+                            <li style="margin-bottom: 0.5rem;">🔍 메타데이터 표준화율: 25%</li>
+                            <li style="margin-bottom: 0.5rem;">👥 데이터 플랫폼팀 인력: 목표 대비 30%</li>
+                            <li>🚫 AI 프로젝트 병목 현상 지속</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p><strong>현재 상황:</strong> AWS 기반 통합 데이터 레이크 구축 중이나, 거버넌스 체계 부재로 실질적 활용 제한</p>
+                        <p style="margin-top: 1rem;"><strong>시급성:</strong> 그룹 차원의 데이터 시너지 창출을 위한 즉각적 조치 필요</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 슬라이드 2: 솔루션/아이디어 제시 -->
+        <section id="slide2" class="slide">
+            <div>
+                <h1>연합형 데이터 거버넌스</h1>
+                <h3>도메인 자율성과 중앙 통제의 균형</h3>
+            </div>
+            
+            <div class="content-grid">
+                <div class="glass-card">
+                    <h3>거버넌스 프레임워크</h3>
+                    <svg viewBox="0 0 600 400" style="width: 100%; height: 300px;">
+                        <!-- 중앙 거버넌스 -->
+                        <rect x="200" y="50" width="200" height="80" rx="10" fill="var(--primary-blue)" opacity="0.8"/>
+                        <text x="300" y="95" text-anchor="middle" fill="white" font-weight="700">중앙 거버넌스</text>
+                        
+                        <!-- 도메인들 -->
+                        <rect x="50" y="200" width="120" height="60" rx="8" fill="var(--accent-cyan)" opacity="0.8"/>
+                        <text x="110" y="235" text-anchor="middle" fill="white">보험 도메인</text>
+                        
+                        <rect x="240" y="200" width="120" height="60" rx="8" fill="var(--accent-cyan)" opacity="0.8"/>
+                        <text x="300" y="235" text-anchor="middle" fill="white">문화 도메인</text>
+                        
+                        <rect x="430" y="200" width="120" height="60" rx="8" fill="var(--accent-cyan)" opacity="0.8"/>
+                        <text x="490" y="235" text-anchor="middle" fill="white">금융 도메인</text>
+                        
+                        <!-- 연결선 -->
+                        <line x1="300" y1="130" x2="110" y2="200" stroke="var(--glass-border)" stroke-width="2"/>
+                        <line x1="300" y1="130" x2="300" y2="200" stroke="var(--glass-border)" stroke-width="2"/>
+                        <line x1="300" y1="130" x2="490" y2="200" stroke="var(--glass-border)" stroke-width="2"/>
+                        
+                        <!-- 데이터 제품 -->
+                        <circle cx="110" cy="320" r="25" fill="var(--data-purple)" opacity="0.6"/>
+                        <circle cx="300" cy="320" r="25" fill="var(--data-purple)" opacity="0.6"/>
+                        <circle cx="490" cy="320" r="25" fill="var(--data-purple)" opacity="0.6"/>
+                        <text x="110" y="325" text-anchor="middle" fill="white" font-size="12">제품</text>
+                        <text x="300" y="325" text-anchor="middle" fill="white" font-size="12">제품</text>
+                        <text x="490" y="325" text-anchor="middle" fill="white" font-size="12">제품</text>
+                    </svg>
+                </div>
+                
+                <div class="glass-card">
+                    <h3>플랫폼팀 구성</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: rgba(37, 99, 235, 0.2); border-radius: 12px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-blue);">리더십</div>
+                            <div style="color: var(--text-secondary);">전략 수립</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(139, 92, 246, 0.2); border-radius: 12px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--data-purple);">엔지니어링</div>
+                            <div style="color: var(--text-secondary);">플랫폼 개발</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(236, 72, 153, 0.2); border-radius: 12px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--data-pink);">사이언스</div>
+                            <div style="color: var(--text-secondary);">AI/ML 개발</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(16, 185, 129, 0.2); border-radius: 12px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--accent-emerald);">거버넌스</div>
+                            <div style="color: var(--text-secondary);">품질 관리</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card" style="margin-top: var(--space-md);">
+                <h3>단계별 로드맵</h3>
+                <div class="timeline">
+                    <div class="timeline-item" style="--index: 0;">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-label">거버넌스 구축<br/>(3개월)</div>
+                    </div>
+                    <div class="timeline-item" style="--index: 1;">
+                        <div class="timeline-dot" style="background: var(--data-purple);"></div>
+                        <div class="timeline-label">인력 확보<br/>(6개월)</div>
+                    </div>
+                    <div class="timeline-item" style="--index: 2;">
+                        <div class="timeline-dot" style="background: var(--accent-emerald);"></div>
+                        <div class="timeline-label">AI 플랫폼<br/>(9개월)</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 1rem;">초기 10명 → 2년 내 25명 규모로 확대</p>
+            </div>
+        </section>
+        
+        <!-- 슬라이드 3: 타겟/시장 분석 -->
+        <section id="slide3" class="slide">
+            <div>
+                <h1>데이터 수요 분석</h1>
+                <h3>5개 계열사 350명의 직접 수혜자</h3>
+            </div>
+            
+            <div class="bubble-container">
+                <div class="bubble" style="width: 150px; height: 150px; top: 20%; left: 20%;">
+                    <div>
+                        <div style="font-size: 1.5rem;">교보생명</div>
+                        <div style="font-size: 0.875rem;">250건/월</div>
+                    </div>
+                </div>
+                <div class="bubble" style="width: 120px; height: 120px; top: 40%; left: 50%;">
+                    <div>
+                        <div style="font-size: 1.25rem;">교보문고</div>
+                        <div style="font-size: 0.875rem;">180건/월</div>
+                    </div>
+                </div>
+                <div class="bubble" style="width: 100px; height: 100px; top: 60%; left: 30%;">
+                    <div>
+                        <div>교보증권</div>
+                        <div style="font-size: 0.75rem;">120건/월</div>
+                    </div>
+                </div>
+                <div class="bubble" style="width: 80px; height: 80px; top: 30%; left: 70%;">
+                    <div>
+                        <div style="font-size: 0.875rem;">e보험</div>
+                        <div style="font-size: 0.75rem;">80건/월</div>
+                    </div>
+                </div>
+                <div class="bubble" style="width: 70px; height: 70px; top: 70%; left: 60%;">
+                    <div>
+                        <div style="font-size: 0.875rem;">SBI</div>
+                        <div style="font-size: 0.75rem;">70건/월</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-grid" style="margin-top: var(--space-md);">
+                <div class="glass-card">
+                    <h3>주요 분석 유형</h3>
+                    <div class="chart-container">
+                        <div class="bar-chart">
+                            <div class="chart-bar" style="height: 100%; --index: 0;" data-value="25%">
+                                <div class="chart-label">고객 360</div>
+                            </div>
+                            <div class="chart-bar" style="height: 80%; --index: 1;" data-value="20%">
+                                <div class="chart-label">상품 추천</div>
+                            </div>
+                            <div class="chart-bar" style="height: 60%; --index: 2;" data-value="15%">
+                                <div class="chart-label">리스크 예측</div>
+                            </div>
+                            <div class="chart-bar" style="height: 60%; --index: 3;" data-value="15%">
+                                <div class="chart-label">마케팅</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <h3>자동화 가능성</h3>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <div class="kpi-value">70%</div>
+                        <div class="kpi-label">자동화 가능 업무</div>
+                        <div class="kpi-trend" style="margin-top: 1rem;">
+                            <span>↑</span> 연간 6,000건 중 4,200건
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; text-align: center;">AutoML, 셀프서비스 포털로 실현</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 슬라이드 4: 실행 계획/프로세스 -->
+        <section id="slide4" class="slide">
+            <div>
+                <h1>3-6-9 실행 계획</h1>
+                <h3>애자일 스프린트와 단계별 확산</h3>
+            </div>
+            
+            <div class="glass-card">
+                <h3>실행 단계</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div style="padding: 1.5rem; background: rgba(249, 115, 22, 0.2); border-radius: 12px;">
+                        <h3 style="color: var(--data-orange);">1단계 (3개월)</h3>
+                        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                            <li>✓ 거버넌스 위원회 구성</li>
+                            <li>✓ 데이터 도메인 정의</li>
+                            <li>✓ 메타데이터 수집 MOU</li>
+                            <li>✓ 표준 정책 수립</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(139, 92, 246, 0.2); border-radius: 12px;">
+                        <h3 style="color: var(--data-purple);">2단계 (6개월)</h3>
+                        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                            <li>✓ 핵심 인력 10명 채용</li>
+                            <li>✓ 시니어 엔지니어 2명</li>
+                            <li>✓ 데이터 사이언티스트 3명</li>
+                            <li>✓ 순환근무 프로그램</li>
+                        </ul>
+                    </div>
+                    <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.2); border-radius: 12px;">
+                        <h3 style="color: var(--accent-emerald);">3단계 (9개월)</h3>
+                        <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                            <li>✓ 교보생명 파일럿</li>
+                            <li>✓ 고객 360 데이터 제품</li>
+                            <li>✓ AutoML 플랫폼</li>
+                            <li>✓ 셀프서비스 포털</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-grid" style="margin-top: var(--space-md);">
+                <div class="glass-card">
+                    <h3>RACI 매트릭스</h3>
+                    <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 0.5rem; text-align: left;">역할</th>
+                                <th style="padding: 0.5rem;">CEO</th>
+                                <th style="padding: 0.5rem;">CDO</th>
+                                <th style="padding: 0.5rem;">팀장</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.5rem;">거버넌스 정책</td>
+                                <td style="padding: 0.5rem; text-align: center;">A</td>
+                                <td style="padding: 0.5rem; text-align: center;">R</td>
+                                <td style="padding: 0.5rem; text-align: center;">C</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem;">인력 채용</td>
+                                <td style="padding: 0.5rem; text-align: center;">I</td>
+                                <td style="padding: 0.5rem; text-align: center;">A</td>
+                                <td style="padding: 0.5rem; text-align: center;">R</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0.5rem;">기술 구현</td>
+                                <td style="padding: 0.5rem; text-align: center;">I</td>
+                                <td style="padding: 0.5rem; text-align: center;">C</td>
+                                <td style="padding: 0.5rem; text-align: center;">R</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="glass-card">
+                    <h3>파일럿 확산 전략</h3>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <svg viewBox="0 0 400 200" style="width: 100%; height: 150px;">
+                            <rect x="50" y="50" width="80" height="40" rx="20" fill="var(--primary-blue)" opacity="0.8"/>
+                            <text x="90" y="75" text-anchor="middle" fill="white" font-size="14">교보생명</text>
+                            
+                            <rect x="170" y="50" width="80" height="40" rx="20" fill="var(--data-purple)" opacity="0.6"/>
+                            <text x="210" y="75" text-anchor="middle" fill="white" font-size="14">교보문고</text>
+                            
+                            <rect x="290" y="50" width="80" height="40" rx="20" fill="var(--accent-cyan)" opacity="0.4"/>
+                            <text x="330" y="75" text-anchor="middle" fill="white" font-size="14">교보증권</text>
+                            
+                            <path d="M 130 70 L 170 70" stroke="var(--glass-border)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 250 70 L 290 70" stroke="var(--glass-border)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="var(--glass-border)"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem;">2주 스프린트 | 분기별 점검 | 지속적 개선</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 슬라이드 5: 결과/성과 예측 -->
+        <section id="slide5" class="slide">
+            <div>
+                <h1>예상 성과 및 ROI</h1>
+                <h3>투자 대비 3배 수익 창출</h3>
+            </div>
+            
+            <div class="content-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">연간 비용 절감</div>
+                    <div class="kpi-value">5억원</div>
+                    <div class="kpi-trend">↓ 처리시간 60% 단축</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">매출 증대</div>
+                    <div class="kpi-value">2%</div>
+                    <div class="kpi-trend">↑ AI 기반 의사결정</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">데이터 품질</div>
+                    <div class="kpi-value">95점</div>
+                    <div class="kpi-trend">↑ 현재 55점 → 95점</div>
+                </div>
+            </div>
+            
+            <div class="glass-card" style="margin-top: var(--space-md);">
+                <h3>3년 누적 ROI</h3>
+                <div style="display: flex; align-items: center; justify-content: space-around; margin-top: 2rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; color: var(--data-orange);">투자</div>
+                        <div style="font-size: 2.5rem; font-weight: 700;">15억원</div>
+                    </div>
+                    <div style="font-size: 3rem;">→</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; color: var(--accent-emerald);">수익</div>
+                        <div style="font-size: 2.5rem; font-weight: 700;">45억원</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card" style="margin-top: var(--space-md);">
+                <h3>혁신 서비스 런칭 계획</h3>
+                <div class="timeline" style="margin-top: 2rem;">
+                    <div class="timeline-item" style="--index: 0;">
+                        <div class="timeline-dot" style="background: var(--data-purple);"></div>
+                        <div class="timeline-label">보험-문화<br/>융합 상품</div>
+                    </div>
+                    <div class="timeline-item" style="--index: 1;">
+                        <div class="timeline-dot" style="background: var(--data-pink);"></div>
+                        <div class="timeline-label">AI 금융<br/>자문 서비스</div>
+                    </div>
+                    <div class="timeline-item" style="--index: 2;">
+                        <div class="timeline-dot" style="background: var(--accent-cyan);"></div>
+                        <div class="timeline-label">개인화<br/>콘텐츠 추천</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 슬라이드 6: 제안/Call to Action -->
+        <section id="slide6" class="slide">
+            <div>
+                <h1>Data-Driven 교보그룹으로</h1>
+                <h3>지금 시작해야 할 이유</h3>
+            </div>
+            
+            <div class="glass-card">
+                <h3>즉시 착수 가능한 5대 과제</h3>
+                <div class="checklist">
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <div class="checklist-checkbox"></div>
+                        <div>
+                            <strong>2월: 거버넌스 위원회 발족</strong>
+                            <span style="color: var(--text-muted); margin-left: 1rem;">각 계열사 대표 참여</span>
+                        </div>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <div class="checklist-checkbox"></div>
+                        <div>
+                            <strong>3월: 핵심 인력 5명 우선 채용</strong>
+                            <span style="color: var(--text-muted); margin-left: 1rem;">시니어급 중심</span>
+                        </div>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <div class="checklist-checkbox"></div>
+                        <div>
+                            <strong>4월: 교보생명 파일럿 시작</strong>
+                            <span style="color: var(--text-muted); margin-left: 1rem;">Quick Win 창출</span>
+                        </div>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <div class="checklist-checkbox"></div>
+                        <div>
+                            <strong>5월: 메타데이터 표준 확정</strong>
+                            <span style="color: var(--text-muted); margin-left: 1rem;">전사 적용</span>
+                        </div>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <div class="checklist-checkbox"></div>
+                        <div>
+                            <strong>6월: 셀프서비스 포털 오픈</strong>
+                            <span style="color: var(--text-muted); margin-left: 1rem;">사용자 교육</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-grid" style="margin-top: var(--space-md);">
+                <div class="glass-card">
+                    <h3>성공 요인</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 2fr); gap: 1rem; margin-top: 1rem;">
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem;">🎯</div>
+                            <div style="font-weight: 600;">리더십 지원</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem;">👥</div>
+                            <div style="font-weight: 600;">인재 확보</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem;">🚀</div>
+                            <div style="font-weight: 600;">기술 투자</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem;">
+                            <div style="font-size: 2rem;">🌟</div>
+                            <div style="font-weight: 600;">문화 혁신</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <h3>왜 지금인가?</h3>
+                    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                        <li style="margin-bottom: 1rem;">📊 <strong>데이터는 21세기의 원유</strong><br/>
+                            <span style="color: var(--text-secondary); margin-left: 2rem;">활용 역량이 곧 경쟁력</span>
+                        </li>
+                        <li style="margin-bottom: 1rem;">🤖 <strong>AI 시대의 선점 효과</strong><br/>
+                            <span style="color: var(--text-secondary); margin-left: 2rem;">늦을수록 격차는 벌어짐</span>
+                        </li>
+                        <li>💎 <strong>그룹 시너지 극대화</strong><br/>
+                            <span style="color: var(--text-secondary); margin-left: 2rem;">융합 서비스로 신시장 창출</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="vision-statement">
+                "문화와 금융의 데이터 시너지로 새로운 고객 가치 창출"
+            </div>
+        </section>
+        
+        <!-- 네비게이션 -->
+        <div class="navigation">
+            <button class="nav-btn" onclick="previousSlide()">이전</button>
+            <button class="nav-btn" onclick="nextSlide()">다음</button>
+        </div>
+        
+        <!-- 슬라이드 인디케이터 -->
+        <div class="slide-indicator">
+            <div class="indicator-dot active" onclick="goToSlide(0)"></div>
+            <div class="indicator-dot" onclick="goToSlide(1)"></div>
+            <div class="indicator-dot" onclick="goToSlide(2)"></div>
+            <div class="indicator-dot" onclick="goToSlide(3)"></div>
+            <div class="indicator-dot" onclick="goToSlide(4)"></div>
+            <div class="indicator-dot" onclick="goToSlide(5)"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 슬라이드 네비게이션
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const indicators = document.querySelectorAll('.indicator-dot');
+        
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(dot => dot.classList.remove('active'));
+            
+            if (index >= 0 && index < slides.length) {
+                slides[index].classList.add('active');
+                indicators[index].classList.add('active');
+                currentSlide = index;
+            }
+        }
+        
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+        
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+        
+        function goToSlide(index) {
+            showSlide(index);
+        }
+        
+        // 키보드 네비게이션
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+            if (e.key >= '1' && e.key <= '6') goToSlide(parseInt(e.key) - 1);
+        });
+        
+        // 체크리스트 토글
+        function toggleCheck(item) {
+            item.classList.toggle('checked');
+        }
+        
+        // 네트워크 노드 인터랙션
+        document.querySelectorAll('.network-node').forEach(node => {
+            node.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.2)';
+            });
+            node.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+            node.addEventListener('click', function() {
+                const company = this.getAttribute('data-company');
+                if (company) {
+                    alert(`${company} 데이터 현황: 자세한 정보는 다음 슬라이드에서 확인하세요.`);
+                }
+            });
+        });
+        
+        // 버블 차트 인터랙션
+        document.querySelectorAll('.bubble').forEach(bubble => {
+            bubble.addEventListener('click', function() {
+                const company = this.querySelector('div > div:first-child').textContent;
+                const volume = this.querySelector('div > div:last-child').textContent;
+                console.log(`${company}: 월간 데이터 분석 요청 ${volume}`);
+            });
+        });
+        
+        // 히트맵 셀 인터랙션
+        document.querySelectorAll('.heatmap-cell').forEach((cell, index) => {
+            cell.addEventListener('click', function() {
+                const companies = ['교보생명', '교보문고', '교보증권', 'e보험', 'SBI'];
+                const value = this.textContent;
+                alert(`${companies[index]} 데이터 활용률: ${value}`);
+            });
+        });
+        
+        // 페이지 로드 시 애니메이션 시작
+        window.addEventListener('load', () => {
+            // 차트 애니메이션 트리거
+            setTimeout(() => {
+                document.querySelectorAll('.chart-bar').forEach(bar => {
+                    bar.style.opacity = '1';
+                });
+            }, 500);
+        });
+        
+        // 터치 제스처 지원 (모바일)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) previousSlide();
+        }
+        
+        // 프레젠터 노트 (P 키로 토글)
+        let presenterMode = false;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' || e.key === 'P') {
+                presenterMode = !presenterMode;
+                console.log('프레젠터 모드:', presenterMode ? '켜짐' : '꺼짐');
+            }
+        });
+        
+        // 전체화면 모드 (F 키)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'f' || e.key === 'F') {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
